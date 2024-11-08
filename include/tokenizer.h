@@ -5,13 +5,14 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 class Tokenizer {
     public:
         // Constructor/Destructor
-        explicit Tokenizer(const std::string& source);
+        explicit Tokenizer(std::string_view source);
         ~Tokenizer();
 
         enum class TokenType {
@@ -63,10 +64,10 @@ class Tokenizer {
         void skip_to_eol();
 
         // Token data access
-        std::string token_to_string(TokenType token) const;
+        std::string_view token_to_string(TokenType token) const;
         const TokenData& get_token_data() const;
         int variable_num() const;
-        const std::string& get_string() const;
+        std::string_view get_string() const;
         int get_num() const;
 
     private:

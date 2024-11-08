@@ -10,6 +10,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
+#include <string_view>
 
 /******************************************************************************/
 
@@ -25,8 +26,8 @@
  * - Keywords map with language keywords
  * - Gets the first token from input
  */
-Tokenizer::Tokenizer(const std::string& source)
-  : io_(std::make_unique<IO>(source))
+Tokenizer::Tokenizer(std::string_view source)
+  : io_(std::make_unique<IO>(std::string(source)))
   , current_token_(TokenType::ERROR)
   , token_data_(std::monostate()) {
     // Initialize keywords
@@ -100,7 +101,7 @@ void Tokenizer::skip_char() { io_->next(); }
  * "NUMBER", "LETTER")
  *         - Returns "UNKNOWN_TOKEN" for undefined token types
  */
-std::string Tokenizer::token_to_string(TokenType token) const {
+std::string_view Tokenizer::token_to_string(TokenType token) const {
     switch (token) {
         case TokenType::ERROR:
             return "ERROR";
@@ -268,7 +269,7 @@ int Tokenizer::variable_num() const {
  * Used to access string literals and keywords from the token_data
  * Returns empty string if token_data doesn't contain a string value
  */
-const std::string& Tokenizer::get_string() const {
+std::string_view Tokenizer::get_string() const {
     static const std::string empty;
     if (std::holds_alternative<std::string>(token_data_)) {
         return std::get<std::string>(token_data_);
@@ -614,23 +615,25 @@ Tokenizer::TokenType Tokenizer::token_keyword() {
         io_->next();
     }
     DEBUG_LOG("Found possible keyword: " << keyword);
+
+    std::string_view keyword_view(keyword);
     // REM is special - don't skip trailing whitespace for it
-    if (keyword == "REM") {
+    if (keyword_view == "REM") {
         return TokenType::REM;
     }
     // Skip trailing whitespace for other keywords
     while (io_->current() == ' ' || io_->current() == '\t') {
         io_->next();
     }
-    if (keyword == "PRINT")
+    if (keyword_view == "PRINT")
         return TokenType::PRINT;
-    if (keyword == "LET")
+    if (keyword_view == "LET")
         return TokenType::LET;
-    if (keyword == "IF")
+    if (keyword_view == "IF")
         return TokenType::IF;
-    if (keyword == "THEN")
+    if (keyword_view == "THEN")
         return TokenType::THEN;
-    if (keyword == "GOTO")
+    if (keyword_view == "GOTO")
         return TokenType::GOTO;
     return TokenType::ERROR;
 }
